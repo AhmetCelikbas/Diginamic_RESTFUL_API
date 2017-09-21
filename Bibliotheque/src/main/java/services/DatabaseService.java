@@ -11,6 +11,8 @@ import javax.persistence.RollbackException;
 import javax.persistence.TransactionRequiredException;
 import javax.persistence.TypedQuery;
 
+import utils.ListFilters;
+
 public class DatabaseService {
 	/* 
 	 * Arguments
@@ -29,11 +31,11 @@ public class DatabaseService {
 	 */
 	/**
 	 * @throws IllegalStateException
-	 * Créé une entité de persistance avec l'unité de persistance "JPA"
+	 * Créé une entité de persistance avec l'unité de persistance "JPA-Persistence-Unit"
 	 */
 	private static void createEntity() throws IllegalStateException {
 		try {
-			entityManagerFactory = Persistence.createEntityManagerFactory("JPA");
+			entityManagerFactory = Persistence.createEntityManagerFactory("JPA-Persistence-Unit");
 			entityManager = entityManagerFactory.createEntityManager();
 		} catch (IllegalStateException e) {
 			System.out.println("MESSAGE" + e.getMessage());
@@ -79,13 +81,16 @@ public class DatabaseService {
 	 * @throws IllegalArgumentException
 	 * Créé une requete et retourne les résultats de la requête sous forme de liste (générique)
 	 */
-	public static <T> List<T> query(String queryString, Class<T> model) throws 	IllegalStateException, 
+	public static <T> List<T> query(String queryString, int offset, int nbrOfResults, String sorting, String order, Class<T> model) throws 	IllegalStateException, 
 																				IllegalArgumentException {
 		try {
 			if(entityManager == null) {
 				createEntity();
 			}
-			TypedQuery<T> query = entityManager.createQuery(queryString, model); 
+			TypedQuery<T> query = entityManager.createQuery(queryString + " " + sorting + " " + ListFilters.order(order), model); 
+			query.setFirstResult(offset);
+			query.setMaxResults(nbrOfResults);
+			
 			return query.getResultList();
 		} catch (IllegalStateException e) {
 			throw e;
