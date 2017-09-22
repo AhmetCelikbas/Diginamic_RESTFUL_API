@@ -29,7 +29,13 @@ public class Api {
 		
 		// Livre
 		public static final String LIVRE_NON_TROUVE = "{\"status\":\"error\",\"description\":\"Livre non trouvé\"}";
-		
+		public static final String LIVRE_ERREUR_VALEUR_TITRE = "{\"status\":\"error\",\"description\":\"Titre manquant ou vide\"}";
+		public static final String LIVRE_ERREUR_VALEUR_DATEPUBLICATION = "{\"status\":\"error\",\"description\":\"Date de publication manquant ou vide\"}";
+		public static final String LIVRE_ERREUR_VALEUR_DESCRIPTION = "{\"status\":\"error\",\"description\":\"Description manquant ou vide\"}";
+		public static final String LIVRE_ERREUR_VALEUR_CATEGORIE = "{\"status\":\"error\",\"description\":\"Catégorie manquant ou vide\"}";
+		public static final String LIVRE_ERREUR_VALEUR_NBEXEMPLAIRE = "{\"status\":\"error\",\"description\":\"Nombre d'expemplaires manquant ou vide\"}";
+		public static final String LIVRE_ERREUR_VALEUR_NBDISPONIBLE = "{\"status\":\"error\",\"description\":\"Nombre de livres disponibles manquant ou vide\"}";
+		public static final String LIVRE_ERREUR_VALEUR_IDAUTEUR = "{\"status\":\"error\",\"description\":\"Id auteur manquant ou vide\"}";
 		
 		
 	public static String errorAsJSON(String errorDescriptionMessage) {

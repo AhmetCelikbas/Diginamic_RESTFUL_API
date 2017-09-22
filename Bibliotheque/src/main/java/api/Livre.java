@@ -29,6 +29,10 @@ public class Livre {
     	
     }
     
+    /**
+     * @param idLivre
+     * @return
+     */
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -91,24 +95,36 @@ public class Livre {
 			@FormParam("datePublication") final String datePublication,
 			@FormParam("description") final String description,
 			@FormParam("categorie") final String categorie,
-			@FormParam("nbExemplaire") final int nbExemplaire,
-			@FormParam("nbDisponible") final int nbDisponible,
-			@FormParam("idAuteur") final int idAuteur
+			@FormParam("nbExemplaire") final String nbExemplaireString,
+			@FormParam("nbDisponible") final String nbDisponibleString,
+			@FormParam("idAuteur") final String idAuteurString
 	){
 		
-		if(titre == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_NOM).build(); }
-		if(titre.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_NOM).build(); }
+		if(titre == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_TITRE).build(); }
+		if(titre.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_TITRE).build(); }
 		
-		if(datePublication == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_PRENOM).build(); }
-		if(datePublication.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_PRENOM).build(); }
+		if(datePublication == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_DATEPUBLICATION).build(); }
+		if(datePublication.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_DATEPUBLICATION).build(); }
 		
-		if(description == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
-		if(description.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+		if(description == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_DESCRIPTION).build(); }
+		if(description.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_DESCRIPTION).build(); }
 
-		if(categorie == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
-		if(categorie.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+		if(categorie == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_CATEGORIE).build(); }
+		if(categorie.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_CATEGORIE).build(); }
 
+		if(nbExemplaireString == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_NBEXEMPLAIRE).build(); }
+		if(nbExemplaireString.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_NBEXEMPLAIRE).build(); }
+
+		if(nbDisponibleString == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_NBDISPONIBLE).build(); }
+		if(nbDisponibleString.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_NBDISPONIBLE).build(); }
+
+		if(idAuteurString == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_IDAUTEUR).build(); }
+		if(idAuteurString.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.LIVRE_ERREUR_VALEUR_IDAUTEUR).build(); }
+			
 		try {
+			
+			
+			int idAuteur = Integer.parseInt(idAuteurString);
 			models.Auteur auteur = DatabaseService.find(models.Auteur.class, idAuteur);
 			if(auteur == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.AUTEUR_NON_TROUVE).build(); }
 				
@@ -122,8 +138,8 @@ public class Livre {
 					), 
 					description, 
 					Categorie.valueOf(categorie), 
-					nbExemplaire,
-					nbDisponible,
+					Integer.parseInt(nbExemplaireString),
+					Integer.parseInt(nbDisponibleString),
 					auteur
 			);
 			
@@ -143,7 +159,7 @@ public class Livre {
 			
 	
 			return Response.status(Response.Status.CREATED).entity(jsonMapper.writeValueAsString(jsonResponse)).build();
-		} catch (java.lang.IllegalArgumentException e) {
+		} catch (java.lang.NumberFormatException e) {
 			return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.errorAsJSON(e.getMessage())).build();
 		} catch (PersistenceException e) {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(utils.Api.INTERNAL_SERVER_ERROR).build();
@@ -152,6 +168,10 @@ public class Livre {
 		} 
 	}
 	
+    /**
+     * @param idLivre
+     * @return
+     */
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -176,6 +196,17 @@ public class Livre {
 
     	}
     
+    /**
+     * @param idLivre
+     * @param titre
+     * @param datePublication
+     * @param description
+     * @param categorie
+     * @param nbExemplaire
+     * @param nbDisponible
+     * @param idAuteur
+     * @return
+     */
     @PUT
     @Path("{id}")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
