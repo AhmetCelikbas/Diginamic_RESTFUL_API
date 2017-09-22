@@ -1,7 +1,6 @@
 package models;
 
 import java.sql.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -37,7 +36,7 @@ public class Livre {
 	private boolean disponible = true;
 	
 	@ManyToOne
-	private Auteur auteur;
+	private models.Auteur auteur;
 	
 	public Livre() {
 		
@@ -49,7 +48,7 @@ public class Livre {
 			String description, 
 			Categorie categorie, 
 			boolean disponible,
-			Auteur auteur
+			models.Auteur auteur
 	) {
 		this.titre = titre;
 		this.datePublication = datePublication;
@@ -152,14 +151,14 @@ public class Livre {
 	/**
 	 * @return the auteur
 	 */
-	public Auteur getAuteur() {
+	public models.Auteur getAuteur() {
 		return auteur;
 	}
 
 	/**
 	 * @param auteur the auteur to set
 	 */
-	public void setAuteur(Auteur auteur) {
+	public void setAuteur(models.Auteur auteur) {
 		this.auteur = auteur;
 	}
 	

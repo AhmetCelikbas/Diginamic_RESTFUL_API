@@ -1,6 +1,5 @@
 package api;
 
-
 import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
 import javax.ws.rs.Consumes;
@@ -16,6 +15,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import models.Langue;
 import services.DatabaseService;
 
@@ -34,10 +36,37 @@ public class Auteur {
     		models.Auteur auteur = DatabaseService.find(models.Auteur.class, idAuteur);
     		if(auteur == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.AUTEUR_NON_TROUVE).build(); }
     		
+    		
+    		
+    		ObjectMapper jsonMapper = new ObjectMapper();
+    		ObjectNode jsonResponse = jsonMapper.createObjectNode();
+    		jsonResponse.put("idAuteur", auteur.getIdAuteur());
+    		jsonResponse.put("nom", auteur.getNom());
+    		jsonResponse.put("prenom", auteur.getPrenom());
+    		jsonResponse.putPOJO("langue", auteur.getLangue());
+    		
+    		ArrayNode livres = jsonMapper.createArrayNode();
+    		for( models.Livre livre :  auteur.getLivre()) {
+    			
+        		ObjectNode livreObject = jsonMapper.createObjectNode();
+        		livreObject.put("idLivre", livre.getIdLivre());
+        		livreObject.put("titre", livre.getTitre());
+        		livreObject.putPOJO("datePublication", livre.getDatePublication());
+        		livreObject.put("description", livre.getDescription());
+        		livreObject.putPOJO("categorie", livre.getCategorie());
+        		livreObject.put("disponible", livre.isDisponible());
+        		
+        		livres.add(livreObject);
+    		}
+    		jsonResponse.putPOJO("livres", livres);
+    		
+
+    		
+    		
     		try {
     			return Response
     				.status(Response.Status.OK)
-    				.entity(new ObjectMapper().writeValueAsString(auteur))
+    				.entity(jsonMapper.writeValueAsString(jsonResponse))
     				.build();
     		} catch (JsonProcessingException e) {
     			
@@ -101,7 +130,7 @@ public class Auteur {
         				.status(Response.Status.BAD_REQUEST)
         				.entity(utils.Api.errorAsJSON(e.getMessage()))
         				.build();
-		}
+		} 
 
     	}
     	
@@ -122,11 +151,10 @@ public class Auteur {
     		
     		try {
 
-    			DatabaseService.getEntity().getTransaction().begin();
     			auteur.setNom(nom);
     			auteur.setPrenom(prenom);
     			auteur.setLangue(Langue.valueOf(langue));
-    			DatabaseService.getEntity().getTransaction().commit();
+    			DatabaseService.update(auteur);
     			
     			return Response
         				.status(Response.Status.OK)

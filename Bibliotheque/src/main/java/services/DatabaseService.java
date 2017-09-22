@@ -200,4 +200,37 @@ public class DatabaseService {
 			throw e;
 		}
 	}
+	
+	
+	/**
+	 * @param obj
+	 * @throws IllegalStateException
+	 * @throws EntityExistsException
+	 * @throws TransactionRequiredException
+	 * @throws RollbackException
+	 * Met à jour dans la base de données l'entité fournie en argument 'Obj'
+	 */
+	public static void update(Object obj) throws 	IllegalStateException,
+													EntityExistsException,
+													TransactionRequiredException,
+													RollbackException {
+		
+		try {
+			if(entityManager == null) {
+				createEntity();
+			}
+			entityManager.getTransaction().begin();
+			entityManager.merge(obj);
+			entityManager.getTransaction().commit();
+		} catch (IllegalStateException e) {
+			throw e;
+		} catch (EntityExistsException e) {
+			throw e;
+		} catch (TransactionRequiredException e) {
+			throw e;
+		} catch (RollbackException e) {
+			throw e;
+		}
+		
+	}
 }

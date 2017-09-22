@@ -13,6 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name="Auteur")
@@ -30,7 +32,8 @@ public class Auteur {
 	
 	@Enumerated(EnumType.STRING)
 	private Langue langue;
-
+	
+//	@JsonIgnore
 	@OneToMany(mappedBy="auteur", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
 	private Set<Livre> livre;
 	

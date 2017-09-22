@@ -1,76 +1,81 @@
 package api;
 
 import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import services.ConfigService;
 import services.DatabaseService;
 import utils.ListFilters;
 
-@Path("/Auteurs")
-public class Auteurs {
-
-    public Auteurs() {
+@Path("/Livres")
+public class Livres {
+	
+    public Livres() {
     }
     
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-	public Response getAuteurs(
+	public Response getLivres(
 			@QueryParam("page") int numPage,
 			@QueryParam("sort") String sorting,
 			@QueryParam("order") String order
 	){	
     	
 		if(sorting == null) {
-			sorting = "order by nom";
+			sorting = "order by titre";
 		} else {
-			if (sorting.equals("byNom")) {
-				sorting = "order by nom";
-			} else if (sorting.equals("byPrenom")) {
-				sorting = "order by prenom";
-			} else if (sorting.equals("byLangue")) {
-				sorting = "order by langue";
+			if (sorting.equals("byTitre")) {
+				sorting = "order by titre";
+			} else if (sorting.equals("byCategorie")) {
+				sorting = "order by categorie";
+			} else if (sorting.equals("byDate")) {
+				sorting = "order by datePublication";
+			} else if (sorting.equals("byDisponible")) {
+				sorting = "order by disponible";
 			} else {
-				sorting = "order by nom";
+				sorting = "order by titre";
 			}
 		}
     		
 
     		try {
-    			List<models.Auteur> auteurs = DatabaseService.query(
-    					"from Auteur", ListFilters.numPage(numPage) * ConfigService.nbrResultatsParPages, 
+    			List<models.Livre> livres = DatabaseService.query(
+    					"from Livre", ListFilters.numPage(numPage) * ConfigService.nbrResultatsParPages, 
     					ConfigService.nbrResultatsParPages, 
     					sorting,
     					order,
-    					models.Auteur.class);
+    					models.Livre.class);
 		
         		ObjectMapper jsonMapper = new ObjectMapper();
         		ObjectNode jsonResponse = jsonMapper.createObjectNode();
 
         		jsonResponse.put("page", numPage);
-        		
-        		
-        		ArrayNode auteursNode = jsonMapper.createArrayNode();
-        		for(models.Auteur auteur :  auteurs) {
-            		ObjectNode auteurObject = jsonMapper.createObjectNode();
-            		auteurObject.put("idAuteur", auteur.getIdAuteur());
-            		auteurObject.put("nom", auteur.getNom());
-            		auteurObject.put("prenom", auteur.getPrenom());
-            		auteurObject.putPOJO("langue", auteur.getLangue());
-            		auteursNode.add(auteurObject);
+
+        		ArrayNode livresNode = jsonMapper.createArrayNode();
+        		for(models.Livre livre :  livres) {
+            		ObjectNode livreObject = jsonMapper.createObjectNode();
+            		livreObject.put("idLivre", livre.getIdLivre());
+            		livreObject.put("titre", livre.getTitre());
+            		livreObject.putPOJO("datePublication", livre.getDatePublication());
+            		livreObject.put("description", livre.getDescription());
+            		livreObject.putPOJO("categorie", livre.getCategorie());
+            		livreObject.put("disponible", livre.isDisponible());
+            		livreObject.put("idAuteur", livre.getAuteur().getIdAuteur());
+            		livresNode.add(livreObject);
         		}
-        		jsonResponse.putPOJO("auteurs", auteursNode);
-        		
-        		
-        		
+        		jsonResponse.putPOJO("livres", livresNode);
         		
         		
         		try {
@@ -99,7 +104,5 @@ public class Auteurs {
 		}
     	
 	}
-
-
-
+    
 }
