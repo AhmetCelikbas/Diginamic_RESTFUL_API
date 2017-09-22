@@ -71,7 +71,8 @@ public class Livres {
             		livreObject.putPOJO("datePublication", livre.getDatePublication());
             		livreObject.put("description", livre.getDescription());
             		livreObject.putPOJO("categorie", livre.getCategorie());
-            		livreObject.put("disponible", livre.isDisponible());
+            		livreObject.put("nbExemplaire", livre.getNbExemplaire());
+            		livreObject.put("nbDisponible", livre.getNbDisponible());
             		livreObject.put("idAuteur", livre.getAuteur().getIdAuteur());
             		livresNode.add(livreObject);
         		}

@@ -32,8 +32,11 @@ public class Livre {
 	@Enumerated(EnumType.STRING)
 	private Categorie categorie;
 	
-	@Column(name="disponible", nullable=false)
-	private boolean disponible = true;
+	@Column(name="nbExemplaires")
+	private int nbExemplaire;
+	
+	@Column(name="nbDisponible")
+	private int nbDisponible;
 	
 	@ManyToOne
 	private models.Auteur auteur;
@@ -47,14 +50,16 @@ public class Livre {
 			Date datePublication, 
 			String description, 
 			Categorie categorie, 
-			boolean disponible,
+			int nbExemplaire,
+			int nbDisponible,
 			models.Auteur auteur
 	) {
 		this.titre = titre;
 		this.datePublication = datePublication;
 		this.description = description;
 		this.categorie = categorie;
-		this.disponible = disponible;
+		this.nbExemplaire = nbExemplaire;
+		this.nbDisponible = nbDisponible;
 		this.auteur = auteur;
 	}
 
@@ -134,18 +139,33 @@ public class Livre {
 		this.categorie = categorie;
 	}
 
+
 	/**
-	 * @return the disponible
+	 * @return the nbExemplaire
 	 */
-	public boolean isDisponible() {
-		return disponible;
+	public int getNbExemplaire() {
+		return nbExemplaire;
 	}
 
 	/**
-	 * @param disponible the disponible to set
+	 * @param nbExemplaire the nbExemplaire to set
 	 */
-	public void setDisponible(boolean disponible) {
-		this.disponible = disponible;
+	public void setNbExemplaire(int nbExemplaire) {
+		this.nbExemplaire = nbExemplaire;
+	}
+
+	/**
+	 * @return the nbDisponible
+	 */
+	public int getNbDisponible() {
+		return nbDisponible;
+	}
+
+	/**
+	 * @param nbDisponible the nbDisponible to set
+	 */
+	public void setNbDisponible(int nbDisponible) {
+		this.nbDisponible = nbDisponible;
 	}
 
 	/**

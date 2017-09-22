@@ -19,8 +19,14 @@ public class Api {
 	 */
 		// API
 		public static final String RESSOURCE_NON_TROUVE = "{\"status\":\"error\",\"description\":\"Ressource non trouvé\"}";
+		public static final String INTERNAL_SERVER_ERROR = "{\"status\":\"error\",\"description\":\"Erreur interne au serveur\"}";
+		
 		// Auteur
 		public static final String AUTEUR_NON_TROUVE = "{\"status\":\"error\",\"description\":\"Auteur non trouvé\"}";
+		public static final String AUTEUR_ERREUR_VALEUR_NOM = "{\"status\":\"error\",\"description\":\"Nom manquant ou vide\"}";
+		public static final String AUTEUR_ERREUR_VALEUR_PRENOM = "{\"status\":\"error\",\"description\":\"Prenom manquant ou vide\"}";
+		public static final String AUTEUR_ERREUR_VALEUR_LANGUE = "{\"status\":\"error\",\"description\":\"Langue manquante,vide ou non prise en charge\"}";
+		
 		// Livre
 		public static final String LIVRE_NON_TROUVE = "{\"status\":\"error\",\"description\":\"Livre non trouvé\"}";
 		

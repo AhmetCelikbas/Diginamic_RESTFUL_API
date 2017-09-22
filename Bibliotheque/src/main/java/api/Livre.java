@@ -1,7 +1,6 @@
 package api;
 
 import javax.persistence.PersistenceException;
-import javax.persistence.RollbackException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -46,7 +45,8 @@ public class Livre {
     		jsonResponse.putPOJO("datePublication", livre.getDatePublication());
     		jsonResponse.put("description", livre.getDescription());
     		jsonResponse.putPOJO("categorie", livre.getCategorie());
-    		jsonResponse.put("disponible", livre.isDisponible());
+    		jsonResponse.put("nbExemplaire", livre.getNbExemplaire());
+    		jsonResponse.put("nbDisponible", livre.getNbDisponible());
     		jsonResponse.put("auteur", livre.getAuteur().getIdAuteur());
     		
     		ObjectNode auteurObject = jsonMapper.createObjectNode();
@@ -74,6 +74,15 @@ public class Livre {
 	}
     
     
+	/**
+	 * @param titre
+	 * @param datePublication
+	 * @param description
+	 * @param categorie
+	 * @param disponible
+	 * @param idAuteur
+	 * @return
+	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -82,55 +91,65 @@ public class Livre {
 			@FormParam("datePublication") final String datePublication,
 			@FormParam("description") final String description,
 			@FormParam("categorie") final String categorie,
-			@FormParam("disponible") final String disponible,
+			@FormParam("nbExemplaire") final int nbExemplaire,
+			@FormParam("nbDisponible") final int nbDisponible,
 			@FormParam("idAuteur") final int idAuteur
 	){
 		
-		models.Auteur auteur = DatabaseService.find(models.Auteur.class, idAuteur);
-		if(auteur == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.AUTEUR_NON_TROUVE).build(); }
-			
-		models.Livre livre = new models.Livre(
-				titre, 
-				new java.sql.Date(
-						DateTimeFormat.forPattern("dd/MM/yyyy")
-							.parseDateTime(datePublication)
-							.toDate()
-							.getTime()
-				), 
-				description, 
-				Categorie.valueOf(categorie), 
-				Boolean.valueOf(disponible),
-				auteur
-		);
+		if(titre == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_NOM).build(); }
+		if(titre.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_NOM).build(); }
 		
-		DatabaseService.presist(livre);
+		if(datePublication == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_PRENOM).build(); }
+		if(datePublication.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_PRENOM).build(); }
+		
+		if(description == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+		if(description.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
 
-		ObjectMapper jsonMapper = new ObjectMapper();
-		ObjectNode jsonResponse = jsonMapper.createObjectNode();
-		jsonResponse.put("idLivre", livre.getIdLivre());
-		jsonResponse.put("titre", livre.getTitre());
-		jsonResponse.putPOJO("datePublication", livre.getDatePublication());
-		jsonResponse.put("description", livre.getDescription());
-		jsonResponse.putPOJO("categorie", livre.getCategorie());
-		jsonResponse.put("disponible", livre.isDisponible());
-		jsonResponse.put("auteur", livre.getAuteur().getIdAuteur());
-		
-		
+		if(categorie == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+		if(categorie.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+
 		try {
-			return Response
-				.status(Response.Status.CREATED)
-				.entity(jsonMapper.writeValueAsString(jsonResponse))
-				.build();
+			models.Auteur auteur = DatabaseService.find(models.Auteur.class, idAuteur);
+			if(auteur == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.AUTEUR_NON_TROUVE).build(); }
+				
+			models.Livre livre = new models.Livre(
+					titre, 
+					new java.sql.Date(
+							DateTimeFormat.forPattern("dd/MM/yyyy")
+								.parseDateTime(datePublication)
+								.toDate()
+								.getTime()
+					), 
+					description, 
+					Categorie.valueOf(categorie), 
+					nbExemplaire,
+					nbDisponible,
+					auteur
+			);
+			
+			DatabaseService.presist(livre);
+	
+			ObjectMapper jsonMapper = new ObjectMapper();
+			ObjectNode jsonResponse = jsonMapper.createObjectNode();
+			jsonResponse.put("idLivre", livre.getIdLivre());
+			jsonResponse.put("titre", livre.getTitre());
+			jsonResponse.putPOJO("datePublication", livre.getDatePublication());
+			jsonResponse.put("description", livre.getDescription());
+			jsonResponse.putPOJO("categorie", livre.getCategorie());
+			jsonResponse.put("nbExemplaire", livre.getNbExemplaire());
+			jsonResponse.put("nbDisponible", livre.getNbDisponible());
+			jsonResponse.put("auteur", livre.getAuteur().getIdAuteur());
+			
+			
+	
+			return Response.status(Response.Status.CREATED).entity(jsonMapper.writeValueAsString(jsonResponse)).build();
+		} catch (java.lang.IllegalArgumentException e) {
+			return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.errorAsJSON(e.getMessage())).build();
+		} catch (PersistenceException e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(utils.Api.INTERNAL_SERVER_ERROR).build();
 		} catch (JsonProcessingException e) {
-			
-			e.printStackTrace();
-			
-			return Response
-				.status(Response.Status.BAD_REQUEST)
-				.entity(utils.Api.errorAsJSON(e.getMessage()))
-				.build();
-			
-		}
+			return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.errorAsJSON(e.getMessage())).build();
+		} 
 	}
 	
     @DELETE
@@ -167,23 +186,31 @@ public class Livre {
     			@FormParam("datePublication") final String datePublication,
     			@FormParam("description") final String description,
     			@FormParam("categorie") final String categorie,
-    			@FormParam("disponible") final String disponible,
+    			@FormParam("nbExemplaire") final int nbExemplaire,
+    			@FormParam("nbDisponible") final int nbDisponible,
     			@FormParam("idAuteur") final int idAuteur
     	){
     		
-    		/*
-    		 * Vérifier params
-    		 */
-    	
-    	
-    		models.Livre livre = DatabaseService.find(models.Livre.class, idLivre);
-    		if(livre == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.LIVRE_NON_TROUVE).build(); }
-    		
-    		models.Auteur auteur = DatabaseService.find(models.Auteur.class, idAuteur);
-    		if(auteur == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.AUTEUR_NON_TROUVE).build(); }
-    		
-    		try {
+		if(titre == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_NOM).build(); }
+		if(titre.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_NOM).build(); }
+		
+		if(datePublication == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_PRENOM).build(); }
+		if(datePublication.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_PRENOM).build(); }
+		
+		if(description == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+		if(description.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
 
+		if(categorie == null) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+		if(categorie.isEmpty()) { return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.AUTEUR_ERREUR_VALEUR_LANGUE).build(); }
+
+  		try {
+	    		models.Livre livre = DatabaseService.find(models.Livre.class, idLivre);
+	    		if(livre == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.LIVRE_NON_TROUVE).build(); }
+	    		
+	    		models.Auteur auteur = DatabaseService.find(models.Auteur.class, idAuteur);
+	    		if(auteur == null) { return Response.status(Response.Status.NOT_FOUND).entity(utils.Api.AUTEUR_NON_TROUVE).build(); }
+
+	    		
     			livre.setTitre(titre);
     			livre.setDatePublication(
 				new java.sql.Date(
@@ -196,21 +223,18 @@ public class Livre {
     			
     			livre.setDescription(description);
     			livre.setCategorie(Categorie.valueOf(categorie));
-    			livre.setDisponible(Boolean.valueOf(disponible));
+    			livre.setNbDisponible(nbDisponible);
+    			livre.setNbExemplaire(nbExemplaire);
     			livre.setAuteur(auteur);
     			
     			DatabaseService.update(livre);
+
+    			return Response.status(Response.Status.OK).entity(utils.Api.LIVRE_MIS_A_JOUR).build();
     			
-    			return Response
-        				.status(Response.Status.OK)
-        				.entity(utils.Api.LIVRE_MIS_A_JOUR)
-        				.build();
-    			
-    		} catch (RollbackException e) {
-    			return Response
-        				.status(Response.Status.BAD_REQUEST)
-        				.entity(utils.Api.errorAsJSON(e.getMessage()))
-        				.build();
+		} catch (java.lang.IllegalArgumentException e) {
+			return Response.status(Response.Status.BAD_REQUEST).entity(utils.Api.errorAsJSON(e.getMessage())).build();
+		} catch (PersistenceException e) {
+			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(utils.Api.INTERNAL_SERVER_ERROR).build();
 		}
 
     	}
